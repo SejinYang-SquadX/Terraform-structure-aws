@@ -19,6 +19,8 @@ run-terraform/
 ├── outputs.tf           # 하위 모듈에서 전달받은 VPC/서브넷 ID 출력
 ├── README.md            # 사용 가이드
 ├── terraform.tf         # required_version, provider 버전 고정
+├── templates/
+│   └── database.env.tpl  # DB 연결 정보를 담은 env 템플릿
 └── modules/
     └── vpc/
         ├── main.tf      # VPC, IGW, Public/Private 서브넷, NAT, 라우팅 구성
@@ -28,6 +30,18 @@ run-terraform/
         ├── main.tf      # 단일 EC2 인스턴스 생성 모듈
         ├── variables.tf # 인스턴스 파라미터(AMI, 타입, 서브넷 등)
         └── outputs.tf   # 인스턴스 ID/IP
+    └── env_bucket/
+        ├── main.tf      # 환경 변수 S3 버킷과 env 객체
+        ├── variables.tf # 버킷 이름, 허용 주체 등
+        └── outputs.tf   # 버킷 정보
+    └── ecr/
+        ├── main.tf      # ECR 리포지토리 및 라이프사이클 정책
+        ├── variables.tf
+        └── outputs.tf
+    └── ecs_service/
+        ├── main.tf      # Fargate 클러스터/서비스 + ALB + IAM
+        ├── variables.tf
+        └── outputs.tf
     └── rds/
         ├── main.tf      # 프라이빗 MySQL RDS 인스턴스 및 서브넷 그룹
         ├── variables.tf # RDS 파라미터(클래스, 스토리지, 자격 증명 등)
@@ -46,8 +60,12 @@ run-terraform/
   - `allowed_ssh_cidr` : 배스천에서 허용할 SSH CIDR
   - `ssh_key_name` / `ssh_private_key_path` : AWS 키페어명과 PEM 저장 경로
   - `public_instance_type` / `private_instance_type` : 각각의 인스턴스 타입
+  - `env_bucket_*` : DB env 파일을 보관할 S3 버킷 이름, 객체 키, 접근 허용 주체 목록
+  - `ecr_*` : 컨테이너 이미지를 저장할 ECR 리포지토리 이름/정책
+  - `ecs_*` / `alb_ingress_cidrs` : Fargate 태스크 사양, 원하는 카운트, 컨테이너 포트, 헬스체크 경로, ALB 접근 CIDR, 로그 보존일, 추가 환경 변수 등
   - `db_*` : MySQL RDS 관련 설정(인스턴스 클래스, 스토리지, 이름, 사용자, 비밀번호, 백업 보존 등) — 비밀번호는 tfvars 또는 환경변수로 안전하게 관리하세요.
-- 프라이빗 EC2 인스턴스는 user_data를 통해 부팅 시 `mysql-client` 패키지를 자동 설치하므로, 곧바로 RDS에 접속할 수 있습니다.
+- 프라이빗 EC2 인스턴스는 user_data를 통해 부팅 시 `mysql-client-core-8.0`(또는 대체 패키지)를 자동 설치하므로, 곧바로 RDS에 접속할 수 있습니다.
+- `.env` 내용은 `templates/database.env.tpl`을 기반으로 렌더링되어 S3 버킷에 저장되며, ECS 태스크 IAM 역할만 읽을 수 있도록 버킷 정책이 자동 적용됩니다. 컨테이너에는 `S3_ENV_BUCKET`/`S3_ENV_KEY` 환경 변수가 주입되므로 애플리케이션이 해당 위치에서 설정을 가져오면 됩니다.
 
 ### 예시 tfvars
 ```hcl
@@ -76,6 +94,24 @@ ssh_key_name         = "dev-app-key"
 ssh_private_key_path = "keys/dev-app.pem"
 public_instance_type = "t3.micro"
 private_instance_type = "t3.micro"
+
+env_bucket_name                = ""
+env_object_key                 = "app.env"
+env_bucket_allowed_principals  = []
+
+ecr_repository_name      = "dev-app-service"
+ecr_image_tag_mutability = "MUTABLE"
+ecr_lifecycle_policy     = null
+
+ecs_container_image_tag  = "latest"
+ecs_container_port       = 8080
+ecs_desired_count        = 1
+ecs_task_cpu             = 256
+ecs_task_memory          = 512
+ecs_health_check_path    = "/"
+alb_ingress_cidrs        = ["0.0.0.0/0"]
+ecs_log_retention_days   = 30
+ecs_environment_variables = []
 
 db_instance_class      = "db.t4g.micro"
 db_allocated_storage   = 20

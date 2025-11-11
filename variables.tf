@@ -98,6 +98,102 @@ variable "private_instance_type" {
   default     = "t3.micro"
 }
 
+# -------------------- 환경 변수 버킷 --------------------
+variable "env_bucket_name" {
+  description = "S3 환경 변수 버킷 이름 (비워두면 자동 생성)."
+  type        = string
+  default     = ""
+}
+
+variable "env_object_key" {
+  description = "env 파일을 저장할 S3 객체 키."
+  type        = string
+  default     = "app.env"
+}
+
+variable "env_bucket_allowed_principals" {
+  description = "S3 버킷/객체에 접근을 허용할 IAM 주체 ARN 목록 (ECS 역할 등)."
+  type        = list(string)
+  default     = []
+}
+
+# -------------------- ECR 설정 --------------------
+variable "ecr_repository_name" {
+  description = "컨테이너 이미지를 저장할 ECR 리포지토리 이름."
+  type        = string
+  default     = "app-service"
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "ECR 태그 변경 여부(MUTABLE/IMMUTABLE)."
+  type        = string
+  default     = "MUTABLE"
+}
+
+variable "ecr_lifecycle_policy" {
+  description = "ECR 라이프사이클 정책(JSON 문자열, 옵션)."
+  type        = string
+  default     = null
+}
+
+# -------------------- ECS/ALB 설정 --------------------
+variable "ecs_container_image_tag" {
+  description = "배포할 컨테이너 이미지 태그."
+  type        = string
+  default     = "latest"
+}
+
+variable "ecs_container_port" {
+  description = "컨테이너 리슨 포트."
+  type        = number
+  default     = 8080
+}
+
+variable "ecs_desired_count" {
+  description = "ECS 서비스 desired count."
+  type        = number
+  default     = 1
+}
+
+variable "ecs_task_cpu" {
+  description = "태스크 CPU 단위."
+  type        = number
+  default     = 256
+}
+
+variable "ecs_task_memory" {
+  description = "태스크 메모리(MB)."
+  type        = number
+  default     = 512
+}
+
+variable "ecs_health_check_path" {
+  description = "ALB 헬스체크 경로."
+  type        = string
+  default     = "/"
+}
+
+variable "alb_ingress_cidrs" {
+  description = "ALB에 접근할 수 있는 CIDR 목록."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "ecs_log_retention_days" {
+  description = "CloudWatch 로그 보존일."
+  type        = number
+  default     = 30
+}
+
+variable "ecs_environment_variables" {
+  description = "추가 컨테이너 환경 변수."
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
 # -------------------- RDS(MySQL) 설정 --------------------
 variable "db_instance_class" {
   description = "RDS 인스턴스 클래스."

@@ -14,6 +14,11 @@ output "database_name" {
   value       = aws_db_instance.this.db_name
 }
 
+output "address" {
+  description = "포트 제외한 DB 엔드포인트 호스트."
+  value       = aws_db_instance.this.address
+}
+
 output "security_group_id" {
   description = "DB 보안 그룹 ID."
   value       = aws_security_group.db.id
