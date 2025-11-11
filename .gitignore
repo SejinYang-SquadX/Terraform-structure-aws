@@ -1,0 +1,13 @@
+# Local Terraform build artifacts
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Terraform variable overrides
+*.tfvars
+*.tfvars.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
