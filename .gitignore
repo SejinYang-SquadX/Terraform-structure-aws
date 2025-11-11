@@ -11,3 +11,7 @@ crash.log
 # CLI configuration files
 .terraformrc
 terraform.rc
+
+# Generated SSH keys
+keys/
+*.pem

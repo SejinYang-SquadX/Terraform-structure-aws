@@ -1,15 +1,17 @@
+# -------------------- 네이밍/기본 정보 --------------------
 variable "name" {
-  description = "Prefix used to build resource names."
+  description = "리소스 이름을 구성할 접두사."
   type        = string
 }
 
+# -------------------- CIDR 정의 --------------------
 variable "vpc_cidr" {
-  description = "CIDR block to assign to the VPC."
+  description = "VPC에 부여할 CIDR 블록."
   type        = string
 }
 
 variable "public_subnets" {
-  description = "Public subnet definitions including CIDR block and AZ."
+  description = "퍼블릭 서브넷 CIDR/AZ 정의 리스트."
   type = list(object({
     cidr = string
     az   = string
@@ -18,7 +20,7 @@ variable "public_subnets" {
 }
 
 variable "private_subnets" {
-  description = "Private subnet definitions including CIDR block and AZ."
+  description = "프라이빗 서브넷 CIDR/AZ 정의 리스트."
   type = list(object({
     cidr = string
     az   = string
@@ -26,14 +28,16 @@ variable "private_subnets" {
   default = []
 }
 
+# -------------------- 부가 리소스 --------------------
 variable "nat_gateway_enabled" {
-  description = "Create a managed NAT Gateway in the first public subnet."
+  description = "첫 번째 퍼블릭 서브넷에 NAT Gateway 생성 여부."
   type        = bool
   default     = true
 }
 
+# -------------------- 공통 태그 --------------------
 variable "tags" {
-  description = "Tags to apply to created resources."
+  description = "생성되는 모든 리소스에 적용할 태그."
   type        = map(string)
   default     = {}
 }

@@ -1,23 +1,25 @@
+# -------------------- 기본 메타 설정 --------------------
 variable "aws_region" {
-  description = "AWS region to deploy resources into."
+  description = "리소스를 배포할 AWS 리전."
   type        = string
   default     = "ap-northeast-2"
 }
 
 variable "project_name" {
-  description = "Prefix used for tagging and naming VPC resources."
+  description = "VPC 리소스 이름/태그에 사용할 접두사."
   type        = string
   default     = "app"
 }
 
+# -------------------- VPC 및 서브넷 CIDR --------------------
 variable "vpc_cidr" {
-  description = "The CIDR block for the VPC."
+  description = "VPC에 할당할 CIDR 블록."
   type        = string
   default     = "10.0.0.0/16"
 }
 
 variable "public_subnets" {
-  description = "List of public subnet definitions with CIDR blocks and AZs."
+  description = "퍼블릭 서브넷 CIDR/AZ 정의 리스트."
   type = list(object({
     cidr = string
     az   = string
@@ -35,7 +37,7 @@ variable "public_subnets" {
 }
 
 variable "private_subnets" {
-  description = "List of private subnet definitions with CIDR blocks and AZs."
+  description = "프라이빗 서브넷 CIDR/AZ 정의 리스트."
   type = list(object({
     cidr = string
     az   = string
@@ -53,13 +55,100 @@ variable "private_subnets" {
 }
 
 variable "nat_gateway_enabled" {
-  description = "Controls whether a managed NAT Gateway is created for private subnets."
+  description = "프라이빗 서브넷용 NAT Gateway 생성 여부."
   type        = bool
   default     = true
 }
 
+# -------------------- 공통 태그 --------------------
 variable "tags" {
-  description = "Common tags applied to all network resources."
+  description = "모든 네트워크 리소스에 공통으로 붙일 태그."
   type        = map(string)
   default     = {}
+}
+
+# -------------------- SSH 및 EC2 설정 --------------------
+variable "allowed_ssh_cidr" {
+  description = "퍼블릭 배스천에 SSH 접속을 허용할 CIDR."
+  type        = string
+  default     = "221.142.31.34/32"
+}
+
+variable "ssh_key_name" {
+  description = "AWS에 등록할 키 페어 이름."
+  type        = string
+  default     = "app-key"
+}
+
+variable "ssh_private_key_path" {
+  description = "생성된 PEM 키를 저장할 로컬 경로."
+  type        = string
+  default     = "keys/app-key.pem"
+}
+
+variable "public_instance_type" {
+  description = "퍼블릭 배스천 인스턴스 타입."
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "private_instance_type" {
+  description = "프라이빗 애플리케이션 인스턴스 타입."
+  type        = string
+  default     = "t3.micro"
+}
+
+# -------------------- RDS(MySQL) 설정 --------------------
+variable "db_instance_class" {
+  description = "RDS 인스턴스 클래스."
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "RDS 스토리지 용량(GB)."
+  type        = number
+  default     = 20
+}
+
+variable "db_engine_version" {
+  description = "MySQL 엔진 버전."
+  type        = string
+  default     = null
+}
+
+variable "db_name" {
+  description = "생성할 기본 DB 이름."
+  type        = string
+  default     = "appdb"
+}
+
+variable "db_username" {
+  description = "RDS 마스터 사용자 이름."
+  type        = string
+  default     = "appadmin"
+}
+
+variable "db_password" {
+  description = "RDS 마스터 비밀번호."
+  type        = string
+  sensitive   = true
+}
+
+variable "db_multi_az" {
+  description = "RDS Multi-AZ 배포 여부."
+  type        = bool
+  default     = false
+}
+
+variable "db_backup_retention" {
+  description = "자동 백업 유지 일수."
+  type        = number
+  default     = 7
+}
+
+variable "db_skip_final_snapshot" {
+  description = "삭제 시 최종 스냅샷 생략 여부."
+  type        = bool
+  default     = true
 }
