@@ -1,0 +1,12 @@
+{
+  "name": "terraform-support-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:tfvars": "node scripts/generate-tfvars.js"
+  },
+  "dependencies": {
+    "hcl2-parser": "^1.0.1"
+  }
+}

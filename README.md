@@ -128,7 +128,22 @@ db_skip_final_snapshot = true
 1. 필요한 값을 담은 tfvars 파일을 준비합니다. (`env/dev.tfvars` 등) — SSH 키 파일이 저장될 `keys/` 폴더가 없다면 먼저 만들어 주세요.
 2. `terraform init`
 3. `terraform plan -var-file=env/dev.tfvars`
--4. 변경 사항을 확인하고 `terraform apply -var-file=env/dev.tfvars`로 배포합니다. (실행 전 반드시 변경 계획 확인 / RDS 생성은 수분이 소요됩니다)
+4. 변경 사항을 확인하고 `terraform apply -var-file=env/dev.tfvars`로 배포합니다. (실행 전 반드시 변경 계획 확인 / RDS 생성은 수분이 소요됩니다)
 5. 리소스를 정리할 때는 동일한 tfvars를 사용하여 `terraform destroy -var-file=env/dev.tfvars`를 실행합니다.
+
+### tfvars 빠르게 만드는 방법
+- 템플릿 복사: `cp env/dev.tfvars.example env/dev.tfvars`
+- Node 스크립트: `npm install && npm run generate:tfvars -- env/dev.tfvars` (`--force`로 덮어쓰기 가능)
+
+### start.sh 인터랙티브 CLI
+- `chmod +x start.sh` 후 `./start.sh` 실행
+- 시작 시 안내되는 필수 준비 사항( AWS 자격 증명, 도구 설치, 비용 승인 )에 모두 `yes`로 답해야 메뉴가 열립니다.
+- 메뉴에서 순서 선택:
+  1) 환경 준비 (npm install + terraform init)
+  2) tfvars 생성/갱신
+  3) plan
+  4) plan + apply (적용 전 확인)
+  5) destroy
+  6) 주요 output 확인 및 파일 저장 (SSH 접속 명령어 포함)
 
 이 가이드를 기반으로 VPC 구성 후, 추후 EC2 모듈 등을 추가하여 `module.network.vpc_id`, `module.network.public_subnet_ids`, `module.network.private_subnet_ids` 출력값을 활용하면 됩니다.
